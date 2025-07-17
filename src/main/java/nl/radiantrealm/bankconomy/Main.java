@@ -1,7 +1,9 @@
 package nl.radiantrealm.bankconomy;
 
+import nl.radiantrealm.bankconomy.controller.Cache;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        new Cache();
     }
 }
