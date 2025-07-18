@@ -3,6 +3,9 @@ package nl.radiantrealm.bankconomy.cache;
 import nl.radiantrealm.bankconomy.controller.Database;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
 import nl.radiantrealm.library.cache.CacheRegistry;
+import nl.radiantrealm.library.sql.TransactionBuilder;
+import nl.radiantrealm.library.sql.TransactionResult;
+import nl.radiantrealm.library.utils.Result;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,24 +19,23 @@ public class PlayerAccountCache extends CacheRegistry<UUID, PlayerAccount> {
     }
 
     @Override
-    protected PlayerAccount load(UUID uuid) throws Exception {
+    protected Result<PlayerAccount> load(UUID uuid) {
         try (Connection connection = Database.getConnection(true)) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM bankconomy_players WHERE player_uuid = ?"
-            );
+            TransactionResult result = TransactionBuilder.prepare(connection, "SELECT * FROM bankconomy_players WHERE player_uuid = ?")
+                    .setUUID(1, uuid)
+                    .executeQuery();
 
-            statement.setString(1, uuid.toString());
-            ResultSet rs = statement.executeQuery();
-
-            if (rs.next()) {
-                return new PlayerAccount(
-                        UUID.fromString(rs.getString("player_uuid")),
-                        rs.getBigDecimal("player_balance"),
-                        rs.getString("player_name")
-                );
+            if (result.rs().next()) { //Maybe add .next method to result?
+                return Result.ok(new PlayerAccount(
+                        uuid,
+                        result.getBigDecimal("player_balance"),
+                        result.getString("player_name")
+                ));
             }
 
-            return null;
+            return Result.ok(null); //Add empty method devs pleaseee
+        } catch (Exception e) {
+            return Result.error(e);
         }
     }
 
