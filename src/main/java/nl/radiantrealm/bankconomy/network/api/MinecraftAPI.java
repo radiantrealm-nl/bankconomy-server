@@ -33,7 +33,7 @@ public class MinecraftAPI {
         }
 
         @Override
-        protected ApiResponse handle(ApiRequest request) { //Remove the throws exception from handle devs
+        protected ApiResponse handle(ApiRequest request) {
             Result<UUID> playerUUID = JsonUtils.getJsonUUID(request.getBody(), "uuid");
 
             if (playerUUID.isObjectEmpty()) {
@@ -60,10 +60,10 @@ public class MinecraftAPI {
                 return ApiResponse.error(500, "Server error.");
             }
 
-            if (reference.get().throwable().isEmpty()) { //Add success bool devs pleaseeee
+            if (reference.get().success()) {
                 return ApiResponse.ok();
             } else {
-                return ApiResponse.error(500, "Server error.");
+                return ApiResponse.error(500, "Server error");
             }
         }
     }
