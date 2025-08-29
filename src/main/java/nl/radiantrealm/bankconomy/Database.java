@@ -1,9 +1,6 @@
 package nl.radiantrealm.bankconomy;
 
-import nl.radiantrealm.bankconomy.record.AuditLog;
-import nl.radiantrealm.bankconomy.record.PlayerAccount;
-import nl.radiantrealm.bankconomy.record.SavingsAccount;
-import nl.radiantrealm.bankconomy.record.TransactionLog;
+import nl.radiantrealm.bankconomy.record.*;
 import nl.radiantrealm.library.controller.DatabaseController;
 
 import java.sql.Connection;
@@ -33,7 +30,7 @@ public class Database extends DatabaseController {
 
         statement.setLong(1, transactionLog.timestamp());
         statement.setString(2, transactionLog.transactionType().name());
-        statement.setString(3, transactionLog.transactionAmount().toString());
+        statement.setBigDecimal(3, transactionLog.transactionAmount());
         statement.setString(4, transactionLog.sourceUUID().toString());
         statement.setString(5, transactionLog.offsetUUID().toString());
         statement.setString(6, transactionLog.message());
@@ -52,12 +49,22 @@ public class Database extends DatabaseController {
         statement.executeUpdate();
     }
 
+    public static void updateGovernmentFunds(Connection connection, GovernmentFunds governmentFunds) throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "UPDATE bankconomy_government_funds SET government_funds = ? WHERE government_uuid = ?"
+        );
+
+        statement.setBigDecimal(1, governmentFunds.governmentBalance());
+        statement.setString(2, governmentFunds.governmentUUID().toString());
+        statement.executeUpdate();
+    }
+
     public static void updatePlayerBalance(Connection connection, PlayerAccount playerAccount) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "UPDATE bankconomy_players SET player_balance = ? WHERE player_uuid = ?"
         );
 
-        statement.setString(1, playerAccount.playerBalance().toString());
+        statement.setBigDecimal(1, playerAccount.playerBalance());
         statement.setString(2, playerAccount.playerUUID().toString());
         statement.executeUpdate();
     }
@@ -67,7 +74,7 @@ public class Database extends DatabaseController {
                 "UPDATE bankconomy_savings SET savings_balance = ? WHERE savings_uuid = ?"
         );
 
-        statement.setString(1, savingsAccount.savingsBalance().toString());
+        statement.setBigDecimal(1, savingsAccount.savingsBalance());
         statement.setString(2, savingsAccount.savingsUUID().toString());
         statement.executeUpdate();
     }
