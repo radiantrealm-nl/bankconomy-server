@@ -5,4 +5,6 @@ public enum TransactionType {
     SAVINGS_WITHDRAW,
     SAVINGS_DELETE,
     PAY_PLAYER,
+    INTEREST_ACCUMULATION,
+    INTEREST_PAYOUT,
 }
