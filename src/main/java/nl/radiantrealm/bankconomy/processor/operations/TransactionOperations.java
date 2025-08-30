@@ -25,6 +25,7 @@ public class TransactionOperations implements ProcessHandler {
         return switch (transaction.transactionType()) {
             case SAVINGS_DEPOSIT -> handleSavingsDeposit(transaction);
             case SAVINGS_WITHDRAW -> handleSavingsWithdraw(transaction);
+            case PAY_PLAYER -> handlePayPlayer(transaction);
             default -> ProcessResult.error("Invalid transaction type.");
         };
     }
