@@ -1,11 +1,9 @@
 package nl.radiantrealm.bankconomy.cache;
 
-import nl.radiantrealm.bankconomy.controller.Database;
+import nl.radiantrealm.bankconomy.Database;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
 import nl.radiantrealm.library.cache.CacheRegistry;
-import nl.radiantrealm.library.sql.TransactionBuilder;
-import nl.radiantrealm.library.sql.TransactionResult;
-import nl.radiantrealm.library.utils.Result;
+import nl.radiantrealm.library.utils.FormatUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,37 +13,38 @@ import java.util.*;
 public class PlayerAccountCache extends CacheRegistry<UUID, PlayerAccount> {
 
     public PlayerAccountCache() {
-        super(15);
+        super(900000);
     }
 
     @Override
-    protected Result<PlayerAccount> load(UUID uuid) {
-        try (Connection connection = Database.getConnection(true)) {
-            TransactionResult result = TransactionBuilder.prepare(connection, "SELECT * FROM bankconomy_players WHERE player_uuid = ?")
-                    .setUUID(1, uuid)
-                    .executeQuery();
+    protected PlayerAccount load(UUID uuid) throws Exception {
+        try (Connection connection = Database.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM bankconomy_players WHERE player_uuid = ?"
+            );
 
-            if (result.rs().next()) { //Maybe add .next method to result?
-                return Result.ok(new PlayerAccount(
+            statement.setString(1, uuid.toString());
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                return new PlayerAccount(
                         uuid,
-                        result.getBigDecimal("player_balance"),
-                        result.getString("player_name")
-                ));
+                        rs.getBigDecimal("player_balance"),
+                        rs.getString("player_name")
+                );
             }
 
-            return Result.ok(null); //Add empty method devs pleaseee
-        } catch (Exception e) {
-            return Result.error(e);
+            return null;
         }
     }
 
     @Override
-    protected Map<UUID, Optional<PlayerAccount>> load(List<UUID> list) throws Exception {
-        String placeholders = String.join(", ", list.stream().map(uuid -> "?").toArray(String[]::new));
+    protected Map<UUID, PlayerAccount> load(List<UUID> list) throws Exception {
+        String params = String.join(", ", Collections.nCopies(list.size(), "?"));
 
-        try (Connection connection = Database.getConnection(true)) {
+        try (Connection connection = Database.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM bankconomy_players WHERE player_uuid IN (" + placeholders + ")"
+                    "SELECT * FROM bankconomy_players WHERE savings_uuid IN (" + params + ")"
             );
 
             for (int i = 0; i < list.size(); i++) {
@@ -53,20 +52,16 @@ public class PlayerAccountCache extends CacheRegistry<UUID, PlayerAccount> {
             }
 
             ResultSet rs = statement.executeQuery();
-            Map<UUID, Optional<PlayerAccount>> result = new HashMap<>();
+            Map<UUID, PlayerAccount> result = new HashMap<>(list.size());
 
             while (rs.next()) {
-                UUID playerUUID = UUID.fromString(rs.getString("player_uuid"));
+                UUID playerUUID = FormatUtils.formatUUID(rs.getString("player_uuid"));
 
-                try {
-                    result.put(playerUUID, Optional.of(new PlayerAccount(
-                            playerUUID,
-                            rs.getBigDecimal("player_balance"),
-                            rs.getString("player_name")
-                    )));
-                } catch (Exception e) {
-                    result.put(playerUUID, Optional.empty());
-                }
+                result.put(playerUUID, new PlayerAccount(
+                        playerUUID,
+                        rs.getBigDecimal("player_balance"),
+                        rs.getString("player_name")
+                ));
             }
 
             return result;
