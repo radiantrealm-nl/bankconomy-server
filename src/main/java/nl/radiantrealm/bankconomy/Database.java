@@ -9,17 +9,17 @@ import java.sql.PreparedStatement;
 public class Database extends DatabaseController {
 
     @Override
-    protected String setDatabaseURL() {
+    protected String databaseURL() {
         return "localhost";
     }
 
     @Override
-    protected String setDatabaseUsername() {
+    protected String databaseUsername() {
         return System.getenv("DB_USERNAME");
     }
 
     @Override
-    protected String setDatabasePassword() {
+    protected String databasePassword() {
         return System.getenv("DB_PASSWORD");
     }
 
