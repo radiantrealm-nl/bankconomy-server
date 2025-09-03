@@ -6,20 +6,18 @@ import nl.radiantrealm.bankconomy.processor.operations.TransactionOperations;
 import nl.radiantrealm.library.processor.ProcessHandler;
 
 public enum ProcessType {
-    CREATE_PLAYER_ACCOUNT(new PlayerAccountOperations.CreateAccount()),
-    UPDATE_PLAYER_NAME(new PlayerAccountOperations.UpdateName()),
+    CREATE_PLAYER_ACCOUNT(PlayerAccountOperations.CreateAccount.class),
+    UPDATE_PLAYER_NAME(PlayerAccountOperations.UpdateName.class),
 
-    CREATE_SAVINGS_ACCOUNT(new SavingsAccountOperations.CreateAccount()),
-    UPDATE_SAVINGS_NAME(new SavingsAccountOperations.UpdateName()),
-    DELETE_SAVINGS_ACCOUNT(new SavingsAccountOperations.DeleteAccount()),
+    CREATE_SAVINGS_ACCOUNT(SavingsAccountOperations.CreateAccount.class),
+    UPDATE_SAVINGS_NAME(SavingsAccountOperations.UpdateName.class),
+    DELETE_SAVINGS_ACCOUNT(SavingsAccountOperations.DeleteAccount.class),
 
-    CREATE_TRANSACTION(new TransactionOperations()),
+    CREATE_TRANSACTION(TransactionOperations.class);
 
-    ;
+    public final Class<? extends ProcessHandler> handler;
 
-    public final ProcessHandler handler;
-
-    ProcessType(ProcessHandler handler) {
+    ProcessType(Class<? extends ProcessHandler> handler) {
         this.handler = handler;
     }
 }
