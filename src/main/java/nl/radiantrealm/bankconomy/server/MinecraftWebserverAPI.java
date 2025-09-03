@@ -11,6 +11,7 @@ import nl.radiantrealm.library.processor.ProcessHandler;
 import nl.radiantrealm.library.processor.ProcessResult;
 import nl.radiantrealm.library.utils.DataObject;
 import nl.radiantrealm.library.utils.JsonUtils;
+import nl.radiantrealm.library.utils.Result;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,7 +48,18 @@ public class MinecraftWebserverAPI extends ApplicationRouter {
                 return;
             }
 
-            ProcessHandler handler = DataObject.fromJson(processType.handler, data);
+            ProcessHandler handler = Result.function(() -> {
+                try {
+                    return DataObject.fromJson(processType.handler, data);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+
+            if (handler == null) {
+                request.sendStatusResponse(StatusCode.BAD_REQUEST, "error", "Invalid or bad input data.");
+                return;
+            }
 
             AtomicReference<ProcessResult> atomicReference = new AtomicReference<>();
             Processor.createProcess(handler, data, atomicReference::set);
