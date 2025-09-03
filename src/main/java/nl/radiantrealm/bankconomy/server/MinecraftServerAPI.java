@@ -5,13 +5,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
-import nl.radiantrealm.bankconomy.processor.ProcessType;
 import nl.radiantrealm.bankconomy.processor.Processor;
+import nl.radiantrealm.bankconomy.processor.operations.PlayerAccountOperations;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
 import nl.radiantrealm.library.http.HttpRequest;
 import nl.radiantrealm.library.http.RequestHandler;
 import nl.radiantrealm.library.http.StatusCode;
 import nl.radiantrealm.library.http.server.ApplicationRouter;
+import nl.radiantrealm.library.processor.ProcessHandler;
 import nl.radiantrealm.library.utils.FormatUtils;
 import nl.radiantrealm.library.utils.JsonUtils;
 
@@ -48,13 +49,15 @@ public class MinecraftServerAPI extends ApplicationRouter {
                 response.addProperty("player_balance", BigDecimal.ZERO);
                 response.addProperty("new_account", true);
 
-                Processor.createProcess(ProcessType.CREATE_PLAYER_ACCOUNT, object, null);
+                ProcessHandler handler = new PlayerAccountOperations.CreateAccount(playerUUID, playerName);
+                Processor.createProcess(handler, object, null);
             } else {
                 response.addProperty("player_balance", playerAccount.playerBalance());
                 response.addProperty("new_account", false);
 
                 if (!playerAccount.playerName().equals(playerName)) {
-                    Processor.createProcess(ProcessType.UPDATE_PLAYER_NAME, object, null);
+                    ProcessHandler handler = new PlayerAccountOperations.UpdateName(playerUUID, playerName);
+                    Processor.createProcess(handler, object, null);
                 }
             }
 
