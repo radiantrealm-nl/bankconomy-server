@@ -76,7 +76,7 @@ public class InterestPayoutOperation implements ProcessHandler {
             connection.commit();
         } catch (Exception e) {
             connection.rollback();
-            return ProcessResult.error("Database error.", e);
+            return ProcessResult.error(500, "Database error.", e);
         }
 
         savingsAccountList.forEach(savingsAccount -> Main.savingsAccountCache.put(savingsAccount.savingsUUID(), savingsAccount));

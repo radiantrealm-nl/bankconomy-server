@@ -121,7 +121,7 @@ public class InterestAccumulationOperation implements ProcessHandler {
             connection.commit();
         } catch (Exception e) {
             connection.rollback();
-            return ProcessResult.error("Database error.", e);
+            return ProcessResult.error(500, "Database error.", e);
         }
 
         Main.governmentFundsCache.put(governmentFunds.governmentUUID(), governmentFunds);
