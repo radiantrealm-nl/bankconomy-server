@@ -42,4 +42,18 @@ public record Transaction(TransactionType transactionType, BigDecimal transactio
                 message
         );
     }
+
+    public boolean isValidAmount(int decimals, boolean aboveZero) {
+        if (aboveZero) {
+            if (transactionAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                return false;
+            }
+        }
+
+        if (transactionAmount.scale() > decimals) {
+            return false;
+        }
+
+        return true;
+    }
 }
