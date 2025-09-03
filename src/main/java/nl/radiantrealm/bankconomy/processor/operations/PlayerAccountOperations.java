@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import nl.radiantrealm.bankconomy.Database;
 import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
-import nl.radiantrealm.bankconomy.cache.SavingsOwnerCache;
 import nl.radiantrealm.bankconomy.enumerator.AuditType;
 import nl.radiantrealm.bankconomy.record.AuditLog;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
@@ -16,23 +15,27 @@ import nl.radiantrealm.library.utils.JsonUtils;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.List;
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class PlayerAccountOperations {
     private static final PlayerAccountCache playerAccountCache = Main.playerAccountCache;
-    private static final SavingsOwnerCache savingsOwnerCache = Main.savingsOwnerCache;
 
-    public static class CreateAccount implements ProcessHandler {
+    public record CreateAccount(UUID playerUUID, String playerName) implements ProcessHandler {
+
+        public CreateAccount(JsonObject object) {
+            this(
+                    JsonUtils.getJsonUUID(object, "player_uuid"),
+                    JsonUtils.getJsonString(object, "player_name")
+            );
+        }
 
         @Override
         public ProcessResult handle(Process process) throws Exception {
-            JsonObject object = process.object();
-
             PlayerAccount playerAccount = new PlayerAccount(
-                    JsonUtils.getJsonUUID(object, "player_uuid"),
+                    playerUUID,
                     BigDecimal.ZERO,
-                    JsonUtils.getJsonString(object, "player_name")
+                    playerName
             );
 
             Connection connection = Database.getConnection(false);
@@ -56,26 +59,32 @@ public class PlayerAccountOperations {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
-                return ProcessResult.error("Database error.", e);
+                throw new SQLException(e);
             }
 
             playerAccountCache.put(playerAccount.playerUUID(), playerAccount);
-            savingsOwnerCache.put(playerAccount.playerUUID(), List.of());
-
             return ProcessResult.ok();
         }
     }
 
-    public static class UpdateName implements ProcessHandler {
+    public record UpdateName(UUID playerUUID, String playerName) implements ProcessHandler {
+
+        public UpdateName(JsonObject object) {
+            this(
+                    JsonUtils.getJsonUUID(object, "player_uuid"),
+                    JsonUtils.getJsonString(object, "player_name")
+            );
+        }
 
         @Override
         public ProcessResult handle(Process process) throws Exception {
-            JsonObject object = process.object();
-
-            UUID playerUUID = JsonUtils.getJsonUUID(object, "player_uuid");
-            String playerName = JsonUtils.getJsonString(object, "player_name");
-
             PlayerAccount playerAccount = playerAccountCache.get(playerUUID);
+
+            if (playerAccount == null) {
+                return ProcessResult.error(404, "Could not find player account.");
+            }
+
+            playerAccount = playerAccount.updateName(playerName);
 
             Connection connection = Database.getConnection(false);
 
@@ -84,8 +93,8 @@ public class PlayerAccountOperations {
                         "UPDATE bankconomy_players SET player_name = ? WHERE player_uuid = ?"
                 );
 
-                statement.setString(1, playerName);
-                statement.setString(2, playerUUID.toString());
+                statement.setString(1, playerAccount.playerName());
+                statement.setString(2, playerAccount.playerUUID().toString());
                 statement.executeUpdate();
 
                 Database.insertAuditLog(connection, AuditLog.createAuditLog(
@@ -97,11 +106,10 @@ public class PlayerAccountOperations {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
-                return ProcessResult.error("Database error.", e);
+                throw new SQLException(e);
             }
 
-            playerAccountCache.put(playerUUID, playerAccount.updateName(playerName));
-
+            playerAccountCache.put(playerAccount.playerUUID(), playerAccount);
             return ProcessResult.ok();
         }
     }
