@@ -8,12 +8,13 @@ import nl.radiantrealm.library.utils.FormatUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.*;
 
 public class SavingsAccountCache extends CacheRegistry<UUID, SavingsAccount> {
 
     public SavingsAccountCache() {
-        super(900000);
+        super(Duration.ofMinutes(15));
     }
 
     @Override

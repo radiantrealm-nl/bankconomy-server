@@ -9,12 +9,13 @@ import nl.radiantrealm.library.utils.FormatUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.*;
 
 public class GovernmentFundsCache extends CacheRegistry<UUID, GovernmentFunds> {
 
     public GovernmentFundsCache() {
-        super(300000);
+        super(Duration.ofMinutes(15));
     }
 
     public GovernmentFunds get(GovernmentUUID governmentUUID) throws Exception {
