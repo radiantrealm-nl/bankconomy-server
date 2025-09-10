@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
+import nl.radiantrealm.bankconomy.cache.SessionTokenCache;
 import nl.radiantrealm.bankconomy.processor.Processor;
 import nl.radiantrealm.bankconomy.processor.operations.PlayerAccountOperations;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
@@ -30,9 +31,10 @@ public class MinecraftServerAPI extends ApplicationRouter {
 
         register("/on-player-join", new OnPlayerJoin());
         register("/sync-player-balance", new SyncPlayerBalance());
+        register("/generate-otp-token", new GetOTPToken());
     }
 
-    public class OnPlayerJoin implements RequestHandler {
+    private class OnPlayerJoin implements RequestHandler {
 
         @Override
         public void handle(HttpRequest request) throws Exception {
@@ -43,29 +45,29 @@ public class MinecraftServerAPI extends ApplicationRouter {
 
             PlayerAccount playerAccount = playerAccountCache.get(playerUUID);
 
-            JsonObject response = new JsonObject();
-
             if (playerAccount == null) {
-                response.addProperty("player_balance", BigDecimal.ZERO);
-                response.addProperty("new_account", true);
-
+                sendResponse(request, BigDecimal.ZERO, true);
                 ProcessHandler handler = new PlayerAccountOperations.CreateAccount(playerUUID, playerName);
                 Processor.createProcess(handler, object, null);
             } else {
-                response.addProperty("player_balance", playerAccount.playerBalance());
-                response.addProperty("new_account", false);
+                sendResponse(request, playerAccount.playerBalance(), false);
 
                 if (!playerAccount.playerName().equals(playerName)) {
                     ProcessHandler handler = new PlayerAccountOperations.UpdateName(playerUUID, playerName);
                     Processor.createProcess(handler, object, null);
                 }
             }
+        }
 
-            request.sendResponse(StatusCode.OK, response);
+        private void sendResponse(HttpRequest request, BigDecimal playerBalance, boolean newAccount) throws Exception {
+            JsonObject object = new JsonObject();
+            object.addProperty("player_balance", playerBalance);
+            object.addProperty("new_account", newAccount);
+            request.sendResponse(StatusCode.OK, object);
         }
     }
 
-    public class SyncPlayerBalance implements RequestHandler {
+    private class SyncPlayerBalance implements RequestHandler {
 
         @Override
         public void handle(HttpRequest request) throws Exception {
@@ -89,6 +91,25 @@ public class MinecraftServerAPI extends ApplicationRouter {
             }
 
             request.sendResponse(StatusCode.OK, response);
+        }
+    }
+
+    private static class GetOTPToken implements RequestHandler {
+
+        @Override
+        public void handle(HttpRequest request) throws Exception {
+            JsonObject object = JsonUtils.getJsonObject(request.getRequestBody());
+
+            UUID playerUUID = JsonUtils.getJsonUUID(object, "player_uuid");
+            Integer token = SessionTokenCache.generateOTPToken(playerUUID);
+
+            if (token == null) {
+                request.sendStatusResponse(StatusCode.SERVER_ERROR, "Failed to generate OTP Token.");
+            } else {
+                JsonObject responseBody = new JsonObject();
+                responseBody.addProperty("token", token);
+                request.sendResponse(StatusCode.OK, responseBody);
+            }
         }
     }
 }
