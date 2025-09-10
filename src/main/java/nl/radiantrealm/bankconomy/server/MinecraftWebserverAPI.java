@@ -1,12 +1,14 @@
 package nl.radiantrealm.bankconomy.server;
 
 import com.google.gson.JsonObject;
-import nl.radiantrealm.library.http.HttpRequest;
+import nl.radiantrealm.bankconomy.cache.SessionTokenCache;
 import nl.radiantrealm.library.http.StatusCode;
 import nl.radiantrealm.library.http.server.ApplicationRouter;
+import nl.radiantrealm.library.utils.FormatUtils;
 import nl.radiantrealm.library.utils.JsonUtils;
 import nl.radiantrealm.library.utils.Result;
 
+import java.net.HttpCookie;
 import java.util.UUID;
 
 public class MinecraftWebserverAPI extends ApplicationRouter {
@@ -20,23 +22,36 @@ public class MinecraftWebserverAPI extends ApplicationRouter {
     }
 
     private void registerPublic(String path, PublicRequestHandler handler) {
-        server.createContext(path, exchange -> {
-            try (exchange) {
-                HttpRequest request = new HttpRequest(exchange);
+        register(path, request -> {
+            HttpCookie cookie = request.getCookie("csrf");
 
-                UUID playerUUID = UUID.randomUUID(); //Add auth later
-
-                JsonObject object = Result.nullFunction(() -> JsonUtils.getJsonObject(request.getRequestBody()));
-
-                if (object == null) {
-                    request.sendStatusResponse(StatusCode.BAD_REQUEST, "Missing JSON body.");
-                    return;
-                }
-
-                handler.handle(request, playerUUID, object);
-            } catch (Exception e) {
-                logger.error(String.format("Unexpected exception in %s.", handler.getClass().getSimpleName()), e);
+            if (cookie == null) {
+                request.sendStatusResponse(StatusCode.UNAUTHORIZED);
+                return;
             }
+
+            UUID sessionUUID = Result.nullFunction(() -> FormatUtils.formatUUID(cookie.getValue()));
+
+            if (sessionUUID == null) {
+                request.sendStatusResponse(StatusCode.UNAUTHORIZED);
+                return;
+            }
+
+            UUID playerUUID = SessionTokenCache.verifySessionUUID(sessionUUID);
+
+            if (playerUUID == null) {
+                request.sendStatusResponse(StatusCode.UNAUTHORIZED);
+                return;
+            }
+
+            JsonObject object = Result.nullFunction(request::getRequestBodyAsJson);
+
+            if (object == null) {
+                request.sendStatusResponse(StatusCode.BAD_REQUEST, "Missing JSON body.");
+                return;
+            }
+
+            handler.handle(request, playerUUID, object);
         });
     }
 }
