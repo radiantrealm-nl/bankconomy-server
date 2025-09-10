@@ -38,7 +38,7 @@ public class MinecraftServerAPI extends ApplicationRouter {
 
         @Override
         public void handle(HttpRequest request) throws Exception {
-            JsonObject object = JsonUtils.getJsonObject(request.getRequestBody());
+            JsonObject object = request.getRequestBodyAsJson();
 
             UUID playerUUID = JsonUtils.getJsonUUID(object, "player_uuid");
             String playerName = JsonUtils.getJsonString(object, "player_name");
@@ -71,7 +71,7 @@ public class MinecraftServerAPI extends ApplicationRouter {
 
         @Override
         public void handle(HttpRequest request) throws Exception {
-            JsonObject object = JsonUtils.getJsonObject(request.getRequestBody());
+            JsonObject object = request.getRequestBodyAsJson();
 
             JsonArray array = JsonUtils.getJsonArray(object, "player_uuids");
             List<UUID> list = new ArrayList<>();
@@ -98,7 +98,7 @@ public class MinecraftServerAPI extends ApplicationRouter {
 
         @Override
         public void handle(HttpRequest request) throws Exception {
-            JsonObject object = JsonUtils.getJsonObject(request.getRequestBody());
+            JsonObject object = request.getRequestBodyAsJson();
 
             UUID playerUUID = JsonUtils.getJsonUUID(object, "player_uuid");
             Integer token = SessionTokenCache.generateOTPToken(playerUUID);
