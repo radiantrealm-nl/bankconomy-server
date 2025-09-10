@@ -181,7 +181,7 @@ public class SavingsAccountOperations {
                 throw new SQLException(e);
             }
 
-            savingsAccountCache.remove(savingsAccount.savingsUUID());
+            savingsAccountCache.remove(savingsAccount.savingsUUID(), null);
             return ProcessResult.ok();
         }
     }
