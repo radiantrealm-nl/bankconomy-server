@@ -1,6 +1,5 @@
 package nl.radiantrealm.bankconomy.processor.operations;
 
-import com.google.gson.JsonObject;
 import nl.radiantrealm.bankconomy.Database;
 import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
@@ -10,7 +9,6 @@ import nl.radiantrealm.bankconomy.record.PlayerAccount;
 import nl.radiantrealm.library.processor.Process;
 import nl.radiantrealm.library.processor.ProcessHandler;
 import nl.radiantrealm.library.processor.ProcessResult;
-import nl.radiantrealm.library.utils.JsonUtils;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -22,13 +20,6 @@ public class PlayerAccountOperations {
     private static final PlayerAccountCache playerAccountCache = Main.playerAccountCache;
 
     public record CreateAccount(UUID playerUUID, String playerName) implements ProcessHandler {
-
-        public CreateAccount(JsonObject object) {
-            this(
-                    JsonUtils.getJsonUUID(object, "player_uuid"),
-                    JsonUtils.getJsonString(object, "player_name")
-            );
-        }
 
         @Override
         public ProcessResult handle(Process process) throws Exception {
@@ -68,13 +59,6 @@ public class PlayerAccountOperations {
     }
 
     public record UpdateName(UUID playerUUID, String playerName) implements ProcessHandler {
-
-        public UpdateName(JsonObject object) {
-            this(
-                    JsonUtils.getJsonUUID(object, "player_uuid"),
-                    JsonUtils.getJsonString(object, "player_name")
-            );
-        }
 
         @Override
         public ProcessResult handle(Process process) throws Exception {
