@@ -54,6 +54,10 @@ public class Processor implements ApplicationService {
         }
     }
 
+    public static void createProcess(ProcessHandler handler) throws IllegalArgumentException {
+        createProcess(handler, null, null);
+    }
+
     public static void createProcess(ProcessHandler handler, JsonObject object, Consumer<ProcessResult> consumer) throws IllegalArgumentException {
         int nextProcessID = processID.incrementAndGet();
 
