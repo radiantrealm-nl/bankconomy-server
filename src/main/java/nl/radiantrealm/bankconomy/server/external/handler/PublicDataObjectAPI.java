@@ -1,4 +1,4 @@
-package nl.radiantrealm.bankconomy.server;
+package nl.radiantrealm.bankconomy.server.external.handler;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,6 +6,7 @@ import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
 import nl.radiantrealm.bankconomy.cache.SavingsAccountCache;
 import nl.radiantrealm.bankconomy.record.SavingsAccount;
+import nl.radiantrealm.bankconomy.server.external.PublicRequestHandler;
 import nl.radiantrealm.library.http.HttpRequest;
 import nl.radiantrealm.library.http.StatusCode;
 import nl.radiantrealm.library.utils.JsonUtils;

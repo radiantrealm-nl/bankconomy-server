@@ -1,4 +1,4 @@
-package nl.radiantrealm.bankconomy.server;
+package nl.radiantrealm.bankconomy.server.external;
 
 import com.google.gson.JsonObject;
 import nl.radiantrealm.library.http.HttpRequest;

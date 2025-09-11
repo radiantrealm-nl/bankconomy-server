@@ -1,8 +1,9 @@
-package nl.radiantrealm.bankconomy.server;
+package nl.radiantrealm.bankconomy.server.external.handler;
 
 import com.google.gson.JsonObject;
 import nl.radiantrealm.bankconomy.processor.ProcessType;
 import nl.radiantrealm.bankconomy.processor.Processor;
+import nl.radiantrealm.bankconomy.server.external.PublicRequestHandler;
 import nl.radiantrealm.library.http.HttpRequest;
 import nl.radiantrealm.library.http.StatusCode;
 import nl.radiantrealm.library.processor.ProcessHandler;
