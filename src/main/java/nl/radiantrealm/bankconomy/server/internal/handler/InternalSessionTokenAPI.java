@@ -21,22 +21,22 @@ public class InternalSessionTokenAPI implements RequestHandler {
             return;
         }
 
-        UUID playerUUID = Result.nullFunction(() -> JsonUtils.getJsonUUID(requestBody, "player_uuid"));
+        UUID sessionUUID = Result.nullFunction(() -> JsonUtils.getJsonUUID(requestBody, "session_uuid"));
 
-        if (playerUUID == null) {
-            request.sendStatusResponse(StatusCode.BAD_REQUEST, "Missing player UUID.");
+        if (sessionUUID == null) {
+            request.sendStatusResponse(StatusCode.BAD_REQUEST, "Missing session UUID.");
             return;
         }
 
-        UUID sessionUUID = SessionTokenCache.verifyPlayerUUID(playerUUID);
+        UUID playerUUID = SessionTokenCache.verifySessionUUID(sessionUUID);
 
-        if (sessionUUID == null) {
-            request.sendStatusResponse(StatusCode.NOT_FOUND, "No session token found.");
+        if (playerUUID == null) {
+            request.sendStatusResponse(StatusCode.NOT_FOUND, "No player found.");
             return;
         }
 
         JsonObject responseBody = new JsonObject();
-        responseBody.addProperty("session_uuid", sessionUUID.toString());
+        responseBody.addProperty("player_uuid", sessionUUID.toString());
         request.sendResponse(StatusCode.OK, responseBody);
     }
 }
