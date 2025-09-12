@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class Processor implements ApplicationService {
-    private final Logger logger = Logger.getLogger(Process.class);
+    private final Logger logger = Logger.getLogger(Processor.class);
 
     private static final AtomicInteger processID = new AtomicInteger(0);
     private static final Map<Integer, Process> processMap = new ConcurrentHashMap<>();
