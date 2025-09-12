@@ -69,7 +69,7 @@ public class SavingsAccountOperations {
                 throw new SQLException(e);
             }
 
-            savingsAccountCache.put(savingsAccount.savingsUUID(), savingsAccount);
+            savingsAccountCache.put(savingsAccount);
             return ProcessResult.ok();
         }
     }
@@ -116,7 +116,7 @@ public class SavingsAccountOperations {
                 throw new SQLException(e);
             }
 
-            savingsAccountCache.put(savingsAccount.savingsUUID(), savingsAccount);
+            savingsAccountCache.put(savingsAccount);
             return ProcessResult.ok();
         }
     }

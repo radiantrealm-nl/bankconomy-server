@@ -53,7 +53,7 @@ public class PlayerAccountOperations {
                 throw new SQLException(e);
             }
 
-            playerAccountCache.put(playerAccount.playerUUID(), playerAccount);
+            playerAccountCache.put(playerAccount);
             return ProcessResult.ok();
         }
     }
@@ -93,7 +93,7 @@ public class PlayerAccountOperations {
                 throw new SQLException(e);
             }
 
-            playerAccountCache.put(playerAccount.playerUUID(), playerAccount);
+            playerAccountCache.put(playerAccount);
             return ProcessResult.ok();
         }
     }
