@@ -1,6 +1,7 @@
 package nl.radiantrealm.bankconomy.server.internal;
 
 import nl.radiantrealm.bankconomy.server.internal.handler.InternalCreateProcessAPI;
+import nl.radiantrealm.bankconomy.server.internal.handler.InternalSessionTokenAPI;
 import nl.radiantrealm.library.http.server.ApplicationRouter;
 
 public class InternalServerAPI extends ApplicationRouter {
@@ -9,5 +10,6 @@ public class InternalServerAPI extends ApplicationRouter {
         super(69420);
 
         register("/create-process", new InternalCreateProcessAPI());
+        register("/get-session-token", new InternalSessionTokenAPI());
     }
 }

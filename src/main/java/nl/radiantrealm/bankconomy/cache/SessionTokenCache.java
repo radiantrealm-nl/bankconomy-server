@@ -16,6 +16,7 @@ public class SessionTokenCache {
     private static final Map<Integer, Long> OTPEXPIRYMAP = new HashMap<>();
 
     private static final Map<UUID, UUID> SESSIONTOKENMAP = new HashMap<>();
+    private static final Map<UUID, UUID> PLAYERSESSIONMAP = new HashMap<>();
     private static final Map<UUID, Long> SESSIONEXPIRYMAP = new HashMap<>();
 
     static {
@@ -38,6 +39,7 @@ public class SessionTokenCache {
             if (timestamp > value) {
                 SESSIONTOKENMAP.remove(key);
                 SESSIONEXPIRYMAP.remove(key);
+                PLAYERSESSIONMAP.remove(key);
             }
         });
     }
@@ -68,11 +70,17 @@ public class SessionTokenCache {
 
         SESSIONTOKENMAP.put(sessionUUID, playerUUID);
         SESSIONEXPIRYMAP.put(sessionUUID, expiry);
+        PLAYERSESSIONMAP.put(playerUUID, sessionUUID);
         return playerUUID;
     }
 
     public static UUID verifySessionUUID(UUID sessionUUID) {
         if (sessionUUID == null) return null;
         return SESSIONTOKENMAP.get(sessionUUID);
+    }
+
+    public static UUID verifyPlayerUUID(UUID playerUUID) {
+        if (playerUUID == null) return null;
+        return PLAYERSESSIONMAP.get(playerUUID);
     }
 }
