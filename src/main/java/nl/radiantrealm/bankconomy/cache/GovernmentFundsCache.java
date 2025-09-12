@@ -22,6 +22,10 @@ public class GovernmentFundsCache extends CacheRegistry<UUID, GovernmentFunds> {
         return get(governmentUUID.uuid);
     }
 
+    public void put(GovernmentFunds governmentFunds) throws IllegalArgumentException {
+        put(governmentFunds.governmentUUID(), governmentFunds);
+    }
+
     @Override
     protected GovernmentFunds load(UUID uuid) throws Exception {
         try (Connection connection = Database.getConnection()) {

@@ -17,6 +17,10 @@ public class PlayerAccountCache extends CacheRegistry<UUID, PlayerAccount> {
         super(Duration.ofMinutes(15));
     }
 
+    public void put(PlayerAccount playerAccount) throws IllegalArgumentException {
+        put(playerAccount.playerUUID(), playerAccount);
+    }
+
     @Override
     protected PlayerAccount load(UUID uuid) throws Exception {
         try (Connection connection = Database.getConnection()) {

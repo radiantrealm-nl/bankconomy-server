@@ -17,6 +17,10 @@ public class SavingsAccountCache extends CacheRegistry<UUID, SavingsAccount> {
         super(Duration.ofMinutes(15));
     }
 
+    public void put(SavingsAccount savingsAccount) throws IllegalArgumentException {
+        put(savingsAccount.savingsUUID(), savingsAccount);
+    }
+
     @Override
     protected SavingsAccount load(UUID uuid) throws Exception {
         try (Connection connection = Database.getConnection()) {
