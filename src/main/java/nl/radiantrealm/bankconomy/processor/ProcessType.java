@@ -2,6 +2,7 @@ package nl.radiantrealm.bankconomy.processor;
 
 import nl.radiantrealm.bankconomy.processor.operations.PlayerAccountOperations;
 import nl.radiantrealm.bankconomy.processor.operations.SavingsAccountOperations;
+import nl.radiantrealm.bankconomy.processor.operations.ShopTransactionOperations;
 import nl.radiantrealm.bankconomy.processor.operations.TransactionOperations;
 import nl.radiantrealm.library.processor.ProcessHandler;
 
@@ -13,7 +14,8 @@ public enum ProcessType {
     UPDATE_SAVINGS_NAME(SavingsAccountOperations.UpdateName.class),
     DELETE_SAVINGS_ACCOUNT(SavingsAccountOperations.DeleteAccount.class),
 
-    CREATE_TRANSACTION(TransactionOperations.class);
+    CREATE_TRANSACTION(TransactionOperations.class),
+    CREATE_SHOP_TRANSACTION(ShopTransactionOperations.class);
 
     public final Class<? extends ProcessHandler> handler;
 
