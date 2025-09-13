@@ -5,40 +5,53 @@ import nl.radiantrealm.bankconomy.Database;
 import nl.radiantrealm.bankconomy.Main;
 import nl.radiantrealm.bankconomy.cache.PlayerAccountCache;
 import nl.radiantrealm.bankconomy.cache.SavingsAccountCache;
+import nl.radiantrealm.bankconomy.enumerator.TransactionType;
 import nl.radiantrealm.bankconomy.record.PlayerAccount;
 import nl.radiantrealm.bankconomy.record.SavingsAccount;
 import nl.radiantrealm.bankconomy.record.Transaction;
 import nl.radiantrealm.library.processor.Process;
 import nl.radiantrealm.library.processor.ProcessHandler;
 import nl.radiantrealm.library.processor.ProcessResult;
-import nl.radiantrealm.library.utils.DataObject;
+import nl.radiantrealm.library.utils.JsonUtils;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
-public record TransactionOperations(Transaction transaction) implements ProcessHandler {
+public record TransactionOperations(UUID playerUUID, UUID targetUUID, TransactionType transactionType, BigDecimal transactionAmount, String transactionMessage) implements ProcessHandler {
     private static final PlayerAccountCache playerAccountCache = Main.playerAccountCache;
     private static final SavingsAccountCache savingsAccountCache = Main.savingsAccountCache;
 
-    public TransactionOperations(JsonObject object) throws Exception {
+    public TransactionOperations(JsonObject object) throws IllegalArgumentException {
         this(
-                DataObject.fromJson(Transaction.class, object)
+                JsonUtils.getJsonUUID(object, "player_uuid"),
+                JsonUtils.getJsonUUID(object, "target_uuid"),
+                JsonUtils.getJsonEnum(object, "transaction_type", TransactionType.class),
+                JsonUtils.getJsonBigDecimal(object, "transaction_amount"),
+                JsonUtils.getJsonString(object, "transaction_message")
         );
     }
 
     @Override
     public ProcessResult handle(Process process) throws Exception {
-        if (!transaction.isValidAmount(2, true)) {
-            return ProcessResult.error(400, "Invalid transaction amount.");
-        }
+        return switch (transactionType) {
+            case SAVINGS_DEPOSIT -> handleSavingsDeposit(createTransaction(playerUUID, targetUUID));
+            case SAVINGS_WITHDRAW -> handleSavingsWithdraw(createTransaction(targetUUID, playerUUID));
+            case PAY_PLAYER -> handlePayPlayer(createTransaction(playerUUID, targetUUID));
 
-        return switch (transaction.transactionType()) {
-            case SAVINGS_DEPOSIT -> handleSavingsDeposit(transaction);
-            case SAVINGS_WITHDRAW -> handleSavingsWithdraw(transaction);
-            case PAY_PLAYER -> handlePayPlayer(transaction);
-
-            default -> ProcessResult.error(400, "Invalid process type.");
+            default -> ProcessResult.error(400, "Transaction type not allowed.");
         };
+    }
+
+    private Transaction createTransaction(UUID sourceUUID, UUID offsetUUID) {
+        return new Transaction(
+                transactionType,
+                transactionAmount,
+                sourceUUID,
+                offsetUUID,
+                transactionMessage
+        );
     }
 
     private ProcessResult handleSavingsDeposit(Transaction transaction) throws Exception {

@@ -28,7 +28,7 @@ public class SavingsAccountOperations {
 
         public CreateAccount(JsonObject object) {
             this(
-                    JsonUtils.getJsonUUID(object, "owner_uuid"),
+                    JsonUtils.getJsonUUID(object, "player_uuid"),
                     JsonUtils.getJsonString(object, "savings_name")
             );
         }
@@ -121,10 +121,11 @@ public class SavingsAccountOperations {
         }
     }
 
-    public record DeleteAccount(UUID savingsUUID) implements ProcessHandler {
+    public record DeleteAccount(UUID ownerUUID, UUID savingsUUID) implements ProcessHandler {
 
         public DeleteAccount(JsonObject object) {
             this(
+                    JsonUtils.getJsonUUID(object, "player_uuid"),
                     JsonUtils.getJsonUUID(object, "savings_uuid")
             );
         }
@@ -135,6 +136,10 @@ public class SavingsAccountOperations {
 
             if (savingsAccount == null) {
                 return ProcessResult.error(404, "Could not find savings account.");
+            }
+
+            if (!savingsAccount.ownerUUID().equals(ownerUUID)) {
+                return ProcessResult.error(401, "No permission.");
             }
 
             PlayerAccount playerAccount = playerAccountCache.get(savingsAccount.ownerUUID());
