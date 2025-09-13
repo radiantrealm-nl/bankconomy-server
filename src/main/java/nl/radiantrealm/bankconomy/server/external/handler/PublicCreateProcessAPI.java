@@ -46,6 +46,7 @@ public class PublicCreateProcessAPI implements PublicRequestHandler {
             return;
         }
 
+        payload.addProperty("player_uuid", playerUUID.toString());
         ProcessHandler handler = Result.nullFunction(() -> DataObject.fromJson(type.handler, payload));
 
         if (handler == null) {
