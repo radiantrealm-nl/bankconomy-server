@@ -50,10 +50,6 @@ public record Transaction(TransactionType transactionType, BigDecimal transactio
             }
         }
 
-        if (transactionAmount.scale() > decimals) {
-            return false;
-        }
-
-        return true;
+        return transactionAmount.scale() <= decimals;
     }
 }
