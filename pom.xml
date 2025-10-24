@@ -25,8 +25,7 @@
         <dependency>
             <groupId>com.github.radiantrealm-nl</groupId>
             <artifactId>radiantrealm-library</artifactId>
-            <version>v1.4.7-beta</version>
+            <version>v2.1.0-beta</version>
         </dependency>
     </dependencies>
-
 </project>
